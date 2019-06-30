@@ -16,7 +16,7 @@ import sys, pyautogui, time
 
 im = Image.open('Test.jpg')
 draw = ImageDraw.Draw(im)
-#Draw a rectangle to cover "Test"
+#Draw a rectangle to cover "Test" text
 """ for x in range(500):
     for y in range(300):
         draw.point((x,y), fill=128) """

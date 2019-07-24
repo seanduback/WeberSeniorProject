@@ -15,8 +15,7 @@ black = 0
 dWinList = []
 #Read in the letter to display as greyscale
 letter = cv2.imread('ScriptL.jpg', 0) 
-
-
+#end of global variables
 ############################################################# Class Definitions #################################################
 class Dwin(object):
     """__init__() functions as the class constructor"""
@@ -27,7 +26,7 @@ class Dwin(object):
         self.xmin = xmin
         self.xmax = xmax
         self.direction = direction
-
+#end of class definitions
 ############################################################# Functions ###########################################
 def changeToBW (img):
     """Change image to Black and White"""
@@ -42,7 +41,7 @@ def changeToBW (img):
                 img[y,x] = 255
             else: #if a pixel is black/near black make it true black
                 img[y,x] = 0
-
+#end of changToBW
 def isPixUp(img, y, x, wId):
     y = y-10
     for xw in range(x, x+9):
@@ -51,9 +50,9 @@ def isPixUp(img, y, x, wId):
             elif img[yw, xw] == 0:
                 wId += 1   
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'u'))
-                return 1
+                return 1, wId, y
     return 0
-
+#end of isPixUp
 def isPixUpperRight(img, y, x, wId):
     y = y-10
     x = x+10
@@ -65,10 +64,7 @@ def isPixUpperRight(img, y, x, wId):
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'ur'))
                 return 1
     return 0
-
-
-
-
+#end of isPixUpperRight
 def isPixRight(img, y, x, wId):
     x = x+10
     for xw in range(x, x+9):
@@ -78,7 +74,7 @@ def isPixRight(img, y, x, wId):
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'r'))
                 return 1
     return 0
-
+#end of isPixRight
 def isPixLeft(img, y, x, wId):
     x = x - 10
     for xw in range(x, x+9):
@@ -86,9 +82,9 @@ def isPixLeft(img, y, x, wId):
             if img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'l'))
-                return 1, x
+                return 1
     return 0
-
+#end of isPixLeft
 def isPixUpperLeft(img, y, x, wId):
     y = y-10
     x = x-10
@@ -98,9 +94,9 @@ def isPixUpperLeft(img, y, x, wId):
             elif img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'ul'))
-                return 1, y, x
+                return 1
     return 0
-
+#end of isPixUpperLeft
 def isPixDown(img, y, x, wId):
     y = y+10
     for xw in range(x, x+9):
@@ -109,9 +105,9 @@ def isPixDown(img, y, x, wId):
             elif img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'd'))
-                return 1, y
-    return 0
-
+                return 1
+    return 
+#end of isPixDown
 def isPixDownLeft(img, y, x, wId):
     y = y+10
     x = x-10
@@ -121,9 +117,9 @@ def isPixDownLeft(img, y, x, wId):
             elif img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'dl'))
-                return 1, y, x
+                return 1
     return 0
-
+#end of isPixDownLeft
 def isPixDownRight(img, y, x, wId):
     y = y+10
     x = x+10
@@ -133,25 +129,73 @@ def isPixDownRight(img, y, x, wId):
             elif img[yw, xw] == 0:    
                 wId += 1   
                 dWinList.append(Dwin(wId, y, y-10, x, x+10, 'dr'))
-                return 1, y, x
+                return 1
     return 0
-
-def createFirstWindow(img, y, x, wId):
+#end of isPixDownRight
+def createFirstDWindow(img, y, x, wId):
     dWinList.append(Dwin(wId, y, y-10, x, x+10, 'fr')) #create first window at the most lower left pixel
+    createDwindows(img, y, x, wId)
     return
+#end of createFirstWindow
 
+def createLimitedWindows(img, y, x, wId):
+    uflag = 1
+    if isPixUp(img, y, x, wId):
+        y = y-10
+        wId += 1
+        uflag += 1
+    elif isPixRight(img, y, x, wId) and uflag > 3:
+        x = x+10
+        wId += 1
+        uflag = 0
+    elif isPixUpperRight(img, y, x, wId):
+        y = y-10
+        x = x+10
+        wId += 1
+        uflag = 0
+    return wId, y, x
 
-def colorDwin (img, class_type = "Dwin"):
+def createAllDWindows(img, y, x, wId):
+
+    if isPixUp(img, y, x, wId):
+        y = y-10
+        wId += 1
+    elif isPixRight(img, y, x, wId):
+        x = x+10
+        wId += 1
+    elif isPixUpperRight(img, y, x, wId):
+        y = y-10
+        x = x+10
+        wId += 1   
+    if isPixUpperLeft(img, y, x, wId):
+        y = y-10
+        x = x-10
+        wId += 1
+    elif isPixLeft(img, y, x, wId):
+        x = x-10
+        wId += 1
+    elif isPixDown(img, y, x, wId):
+        y = y+10
+        wId += 1
+    return wId, y, x
+
+def createDwindows(img, y, x, wId):
+    while wId != 3:
+        
+        wId, y, x = createLimitedWindows(img, y, x, wId)
+        while 15 < wId and wId < 400:
+            wId, y, x = createAllDWindows(img, y, x, wId)
+
+    #end of createDwindows
+def colorDwin (img, class_type="Dwin"):
     for Dwin in dWinList:
         print ("Window#= %s, xmin=%s, xmax= %s, ymin= %s ymax= %s, direction=  %s"% (Dwin.idnum, Dwin.xmin, Dwin.xmax, Dwin.ymin, Dwin.ymax, Dwin.direction))
         for x in range(Dwin.xmin, Dwin.xmax):
             for y in range(Dwin.ymin, Dwin.ymax, -1):
                 img[y, x] = 0
-
-
-
-def createWindows(img, class_type = "Dwin"):
-    """Create Decision windows"""
+#end of colorDwin
+def initLetter(img, class_type = "Dwin"):
+    """Convert img to BW and Create Decision windows"""
     #change the image to black and white
     changeToBW(img)
     # find the height, width, of the image
@@ -159,66 +203,40 @@ def createWindows(img, class_type = "Dwin"):
     xs = img.shape[1]
     oneTimeFlag = 1
     wId = 1
-    #iterate over entire image starting at bottom left to find most lower left pixel
+    #iterate over image starting at bottom left to find most lower left pixel
     x = 0
     y = ys-1
     while x < xs-1:
-        for Dwin in dWinList:
-            for xd in range(Dwin.xmin, Dwin.xmax):
-                if x >= 1920:
-                    break
-                elif x == xd:
-                    x += 10
-                else:
-                    break
-            break
+        # for Dwin in dWinList:
+        #     for xd in range(Dwin.xmin, Dwin.xmax):
+        #         if x >= 1920:
+        #             break
+        #         elif x == xd:
+        #             x += 10
+        #         else:
+        #             break
+        #     break
         y = ys-1
         while  y > 0:
-            for Dwin in dWinList:
-                for yd in range(Dwin.ymin, Dwin.ymax, -1):
-                    if y == yd:
-                        y -= 10
-                    else:
-                        break
-                break
+            # for Dwin in dWinList:
+            #     for yd in range(Dwin.ymin, Dwin.ymax, -1):
+            #         if y == yd:
+            #             y -= 10
+            #         else:
+            #             break
+            #     break
             if img[y, x] == 0:
                 if oneTimeFlag:
                     oneTimeFlag = 0
-                    createFirstWindow(img, y, x, wId)
-                elif isPixUp(img, y, x, wId):
-                    y = y-10
-                    wId += 1
-                elif isPixRight(img, y, x, wId):
-                    x = x+10
-                    wId += 1
-                elif isPixUpperRight(img, y, x, wId):
-                    y = y-10
-                    x = x+10
-                    wId += 1
-                # elif isPixDown(img, y, x, wId):
-                #     y = isPixUp(img, y, x, wId)[1]
-                #     wId += 1
-                # elif isPixLeft(img, y, x, wId):
-                #     x = isPixLeft(img, y, x, wId)[1]
-                #     wId += 1
-                # elif isPixUpperLeft(img, y, x, wId):
-                #     y = isPixUpperLeft(img, y, x, wId)[1]
-                #     x = isPixUpperLeft(img, y, x, wId)[2]
-                #     wId += 1
-                else:
-                    y -= 1
+                    createFirstDWindow(img, y, x, wId)
+                    return
             else:
                 y -= 1
-        x += 1
+        x += 1            
 
-
-
-
-    colorDwin(img, dWinList)            
-
-dWinList.append(Dwin(0, 0, 0, 0, 0))
-createWindows(letter, dWinList)
-
+#dWinList.append(Dwin(0, 0, 0, 0, 0))
+initLetter(letter, dWinList)
+colorDwin(letter, dWinList)
 cv2.imshow('title', letter)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

@@ -42,26 +42,26 @@ def changeToBW (img):
                 img[y,x] = 0
 
 def isPixUp(img, y, x, wId):
-    y = y-5
-    for xw in range(x, x+4):
-        for yw in range(y-4, y):
+    y = y-3
+    for xw in range(x, x+2):
+        for yw in range(y-2, y):
             if xw >= 1920: break
             elif img[yw, xw] == 0:
                 wId += 1   
-                dWinList.append(Dwin(wId, y, y-5, x, x+5, 'u'))
-                return 1, wId, y
-    return 0
+                dWinList.append(Dwin(wId, y, y-3, x, x+3, 'u'))
+                return y, x, wId 
+    return y, x, wId 
 
 def isPixUpperRight(img, y, x, wId):
-    y = y-5
-    x = x+5
-    for xw in range(x, x+4):
-        for yw in range(y-4, y):
+    y = y-3
+    x = x+3
+    for xw in range(x, x+2):
+        for yw in range(y-2, y):
             if xw >= 1920: break
             elif img[yw, xw] == 0:    
                 wId += 1   
-                dWinList.append(Dwin(wId, y, y-5, x, x+5, 'ur'))
-                return 1
+                dWinList.append(Dwin(wId, y, y-3, x, x+3, 'ur'))
+                return y, x, wId 
     return 0
 
 def isPixRight(img, y, x, wId):
@@ -71,7 +71,7 @@ def isPixRight(img, y, x, wId):
             if img[yw, xw] == 0: 
                 wId += 1   
                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'r'))
-                return 1
+                return y, x, wId 
     return 0
 
 def isPixLeft(img, y, x, wId):
@@ -81,7 +81,7 @@ def isPixLeft(img, y, x, wId):
             if img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'l'))
-                return 1
+                return y, x, wId 
     return 0
 
 def isPixUpperLeft(img, y, x, wId):
@@ -93,7 +93,7 @@ def isPixUpperLeft(img, y, x, wId):
             elif img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'ul'))
-                return 1
+                return y, x, wId 
     return 0
 
 def isPixDown(img, y, x, wId):
@@ -104,7 +104,7 @@ def isPixDown(img, y, x, wId):
             elif img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'd'))
-                return 1
+                return y, x, wId 
     return 
 
 def isPixDownLeft(img, y, x, wId):
@@ -116,7 +116,7 @@ def isPixDownLeft(img, y, x, wId):
             elif img[yw, xw] == 0:
                 wId += 1
                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'dl'))
-                return 1
+                return y, x, wId 
     return 0
 
 def isPixDownRight(img, y, x, wId):
@@ -128,63 +128,12 @@ def isPixDownRight(img, y, x, wId):
             elif img[yw, xw] == 0:    
                 wId += 1   
                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'dr'))
-                return 1
+                return y, x, wId
     return 0
 
 def createFirstDWindow(img, y, x, wId):
     dWinList.append(Dwin(wId, y, y-5, x, x+5, 'fr')) #create first window at the most lower left pixel
-    # end = 0
-    # upFlag = 0
-    # while end != 1:
-    #     end, y, x, wId, upFlag = createAllDWindows(img, y, x, wId, upFlag)
-    #return
     return y, x, wId
-
-def createAllDWindows(img, y, x, wId, upFlag=0):
-
-    if isPixUp(img, y, x, wId) and upFlag == 0:
-        y = y-5
-        wId += 1
-        end = 0
-        return end, y, x, wId, upFlag
-    elif isPixRight(img, y, x, wId):
-        x = x+5
-        wId += 1
-        end = 0
-        return end, y, x, wId, upFlag
-    elif isPixUpperRight(img, y, x, wId):
-        y = y-5
-        x = x+5
-        wId += 1   
-        end = 0
-        return end, y, x, wId, upFlag
-    elif isPixUpperLeft(img, y, x, wId):
-        y = y-5
-        x = x-5
-        wId += 1
-        end = 0
-        return end, y, x, wId, upFlag
-    elif isPixLeft(img, y, x, wId):
-        x = x-5
-        wId += 1
-        end = 0
-        return end, y, x, wId, upFlag
-    elif isPixDown(img, y, x, wId):
-        y = y+5
-        wId += 1
-        end = 0
-        upFlag = 1
-        return end, y, x, wId, upFlag
-    else:
-        end = 1
-        return end, y, x, wId, upFlag
-
-def colorDwin (img, class_type="Dwin"):
-    for Dwin in dWinList:
-        print ("Window#= %s, xmin=%s, xmax= %s, ymin= %s ymax= %s, direction=  %s"% (Dwin.idnum, Dwin.xmin, Dwin.xmax, Dwin.ymin, Dwin.ymax, Dwin.direction))
-        for x in range(Dwin.xmin, Dwin.xmax):
-            for y in range(Dwin.ymin, Dwin.ymax, -1):
-                img[y, x] = 0
 
 def initLetter(img, class_type = "Dwin"):
     """Convert img to BW and Create Decision windows"""
@@ -204,15 +153,28 @@ def initLetter(img, class_type = "Dwin"):
             if img[y, x] == 0:
                 if oneTimeFlag:
                     oneTimeFlag = 0
-                    createFirstDWindow(img, y, x, wId)
-                    return y, x, wId
+                    y, x, wId = createFirstDWindow(img, y, x, wId)
+                    y, x, wId = isPixUp(img, y, x, wId)
+                    y, x, wId = isPixUpperRight(img, y, x, wId)
+                    y, x, wId = isPixUp(img, y, x, wId)
+                    y, x, wId = isPixUpperRight(img, y, x, wId)
+
+                   
+                    return 
             else:
                 y -= 1
-        x += 1            
+        x += 1     
 
-y, x, wId = initLetter(letter, dWinList)
+def colorDwin (img, class_type="Dwin"):
+    for Dwin in dWinList:
+        for x in range(Dwin.xmin, Dwin.xmax):
+            for y in range(Dwin.ymin, Dwin.ymax, -1):
+                if img[y, x] == 0:
+                    print ("Window#= %s, xmin=%s, xmax= %s, ymin= %s ymax= %s, direction=  %s"% (Dwin.idnum, Dwin.xmin, Dwin.xmax, Dwin.ymin, Dwin.ymax, Dwin.direction))
+                else:
+                    img[y, x] = 0
 
-y, x, wId = isPixUp(img, y, x, wId)
+initLetter(letter, dWinList)
 
 colorDwin(letter, dWinList)
 cv2.imshow('title', letter)

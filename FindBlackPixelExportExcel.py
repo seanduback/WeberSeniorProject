@@ -54,7 +54,7 @@ def initLetter(img, class_type = "PixelLocation"):
 
 
 def excelOutput(filename, sheet, class_type = "PixelLocation"):
-    i = 0
+    i = 1
     book = xlwt.Workbook()
     sh = book.add_sheet(sheet)
     col1_name = 'Pixel Number'

@@ -4,8 +4,7 @@ import sys
 import numpy as np 
 import cv2
 from pynput.mouse import Controller
-from collections import deque
-import datetime
+
 
 # Notes
 #     Make image black and white
@@ -59,55 +58,65 @@ def colorDwin (img, class_type="Dwin"):
                 # else:
                 #     img[y, x] = 0
 
-def greenBallTracking (img):
-    # this is code I got from the site below
-    # https://www.pyimagesearch.com/2015/09/14/ball-tracking-with-opencv/
+# def loadImage(img):
+#     filename = ImageTk.PhotoImage(img)
+#     ys = img.shape[0]
+#     xs = img.shape[1]
+#     canvas = Canvas(gui,height=ys,width=xs)
+#     canvas.image = filename  # <--- keep reference of your image
+#     canvas.create_image(0,0,anchor='nw',image=filename)
+#     canvas.pack()
 
-    # define the lower and upper boundaries of the "green"
-    # ball in the HSV color space, then initialize the
-    # list of tracked points
-    greenLower = (55//2, 50, 6)    # lower limit
-    greenUpper = (90//2, 255, 255) # upper limit
-    #pts = deque(maxlen=100)
-    # if a video path was not supplied, grab the reference
-    # to the webcam
-    camera = cv2.VideoCapture(1)
+# def draw (img):
+#     # Global variables
+#     canvas = np.ones([1080,1920,3],'uint8')*255
+#     test = cv2.imread("scriptL.jpg", cv2.IMREAD_COLOR)
+#     image = cv2.add(test, canvas)
+#     radius = 3
+#     color = (0,255,0)
+#     pressed = False
+#     # click callback
+#     def click(event, x, y, flags, param):
+#         global canvas, pressed
+#         if event == cv2.EVENT_LBUTTONDOWN: #pressed is only = to true when left button is pressed down
+#             pressed = True
+#             cv2.circle(canvas,(x,y),radius,color,-1)
+#         if event == cv2.EVENT_MOUSEMOVE: #draws circle when mouse is moved
+#             cv2.circle(canvas,(x,y),radius,color,-1)
+#         elif event == cv2.EVENT_LBUTTONUP:
+#             pressed = False
+#     # window initialization and callback assignment
+#     cv2.namedWindow("canvas")
+#     cv2.setMouseCallback("canvas", click)
+#     # Forever draw loop
+#     while True:
+#         cv2.imshow("image", image)
+#         # key capture every 1ms
+#         ch = cv2.waitKey(1)
+#         if ch & 0xFF == ord('q'):
+#             break
+#         elif ch & 0xFF == ord('b'):
+#             color = (255,0,0)
+#         elif ch & 0xFF == ord('g'):
+#             color = (0,255,0)
+#     cv2.destroyAllWindows()
 
-    # grab the current frame
-    (grabbed, frame) = camera.read()
-
-    # resize the frame, blur it, and convert it to the HSV
-    # color space
-    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # construct a mask for the color "green", then perform
-    # a series of dilations and erosions to remove any small
-    # blobs left in the mask
-    mask = cv2.inRange(hsv, greenLower, greenUpper)
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
-
-    # find contours in the mask and initialize the current
-    # (x, y) center of the ball
-    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-    cv2.CHAIN_APPROX_SIMPLE)[-2]
-    center = None
-
-    # only proceed if at least one contour was found
-    if len(cnts) > 0:
-        # find the largest contour in the mask, then use
-        # centroid
-        c = max(cnts, key=cv2.contourArea)
-        M = cv2.moments(c)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
-        # only proceed if the radius meets a minimum size
-        if radius > 2:
-            cv2.circle(img, center, 5, (0, 0, 255), -1)
-    # cleanup the camera
-    camera.release()
-
+def draw (img):
+    # mouse callback function
+    def draw_circle(event,x,y,flags,param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            cv2.circle(img,(x,y),3,(255,0,0),-1)
+    # Create a black image, a window and bind the function to window
+    cv2.namedWindow('image')
+    cv2.setMouseCallback('image',draw_circle)
+    mouse = Controller()
+    
+    while(1):
+        cv2.imshow('image',img)
+        if cv2.waitKey(20) & 0xFF == 27:
+            print('The current pointer position is {0}'.format(mouse.position))
+            break
+    cv2.destroyAllWindows()
 
 dWinList.append(Dwin(0, 613, 583, 831, 843,))
 dWinList.append(Dwin(1, 583, 574, 845, 855,))
@@ -149,11 +158,8 @@ dWinList.append(Dwin(36, 635, 605, 920, 945,))
 
 
 changeToBW(letter)
-
-key = cv2.waitKey(1) & 0xFF
-# if the q key is pressed, stop the loop
-if key == ord("q"):
-    cv2.destroyAllWindows()
-else: 
-    greenBallTracking(letter)
-    cv2.imshow("Frame", letter)
+#colorDwin(letter, dWinList)
+# cv2.imshow('title', letter)
+draw(letter)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()

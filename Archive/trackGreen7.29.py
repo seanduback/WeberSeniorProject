@@ -11,7 +11,7 @@ import time
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video",
 	help="path to the (optional) video file")
-ap.add_argument("-b", "--buffer", type=int, default=64,
+ap.add_argument("-b", 32, type=int, default=64,
 	help="max buffer size")
 args = vars(ap.parse_args())
 
@@ -38,7 +38,6 @@ time.sleep(2.0)
 while True:
 	# grab the current frame
     frame = vs.read()
- 
 	# handle the frame from VideoCapture or VideoStream
 	frame = frame[1] if args.get("video", False) else frame
  

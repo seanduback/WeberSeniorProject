@@ -23,6 +23,9 @@ dWinList = []
 letter = cv2.imread('ScriptL.jpg', 1) 
 DBOffset = 3
 DSOffset = 2
+pixDist = []
+
+
 
 ############################################################# Class Definitions #################################################
 class Dwin(object):
@@ -33,6 +36,7 @@ class Dwin(object):
         self.xmin = xmin
         self.xmax = xmax
         self.direction = direction
+
 
 ############################################################# Functions ###########################################
 def changeToBW (img):
@@ -64,20 +68,16 @@ def greenBallTracking (img):
     # https://www.pyimagesearch.com/2015/09/14/ball-tracking-with-opencv/
 
     # define the lower and upper boundaries of the "green"
-    # ball in the HSV color space, then initialize the
-    # list of tracked points
     greenLower = (55//2, 50, 6)    # lower limit
     greenUpper = (90//2, 255, 255) # upper limit
-    #pts = deque(maxlen=100)
-    # if a video path was not supplied, grab the reference
-    # to the webcam
+  
+    # grab the referenceto the webcam
     camera = cv2.VideoCapture(1)
 
     # grab the current frame
     (grabbed, frame) = camera.read()
 
-    # resize the frame, blur it, and convert it to the HSV
-    # color space
+    # resize the frame, blur it, and convert it to the HSV color space
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -105,9 +105,26 @@ def greenBallTracking (img):
         # only proceed if the radius meets a minimum size
         if radius > 2:
             cv2.circle(img, center, 5, (0, 0, 255), -1)
+
     # cleanup the camera
     camera.release()
 
+def distance(x0, y0, x1, y1):
+    return math.sqrt((x0 - x1)**2 + (y0 - y1)**2)
+
+def getMaxDistance (img, dWinNum, inputX, inputY):
+    for i in range (dWinNum, dWinNum + 1):
+        for x in range (Dwin(i).xmin, Dwin(i).xmax):
+            for y in range (Dwin(i).ymin, Dwin(i).ymax, -1): 
+                if img[y, x] == black:
+                    count += 1
+                    pixDist[count] = distance(x, y, inputX, inputY)
+        maxPixDist[i] = max(pixDist)
+    if maxPixDist[i+1] > maxPixDist[i]:
+        return dWinNum+1, maxPixDist[i+1]
+    else:
+        return dWinNum, maxPixDist[i]                 
+                    
 
 dWinList.append(Dwin(0, 613, 583, 831, 843,))
 dWinList.append(Dwin(1, 583, 574, 845, 855,))

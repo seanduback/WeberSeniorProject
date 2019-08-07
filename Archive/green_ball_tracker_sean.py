@@ -13,12 +13,12 @@ import cv2
 # define the lower and upper boundaries of the "green"
 # ball in the HSV color space, then initialize the
 # list of tracked points
-greenLower = (29, 86, 6)
-greenUpper = (64, 255, 255)
+greenLower = (0, 0, 0)
+greenUpper = (150, 255, 255)
 pts = deque(maxlen=100)
 # if a video path was not supplied, grab the reference
 # to the webcam
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 
 
 # keep looping

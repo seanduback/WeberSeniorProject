@@ -2,8 +2,12 @@ import sys
 import numpy as np 
 import cv2
 import xlwt
+from collections import deque
+import datetime
 
-
+White = [200,200,200]
+Black = [20,20,20]
+nearBlack = [5,5,5]
 
 
 
@@ -32,7 +36,6 @@ def changeToBW (img):
 
 def initLetter(img, class_type = "PixelLocation"):
  #change the image to black and white
-    changeToBW(img)
     # find the height, width, of the image
     ys = img.shape[0]
     xs = img.shape[1]
@@ -43,11 +46,13 @@ def initLetter(img, class_type = "PixelLocation"):
     while x < xs-1:
         y = ys-1
         while  y > 0:
-            if img[y, x] == 0:
-                num += 1
-                pixLoc.append(PixelLocation(num, y, x))
+            if np.allclose((img[y,x]), Black, 1, 1):
+                y -= 1
+            elif np.allclose((img[y,x]), White, 5, 5):
                 y -= 1
             else:
+                num += 1
+                pixLoc.append(PixelLocation(num, y, x))
                 y -= 1
         x += 1  
 
@@ -74,5 +79,8 @@ def excelOutput(filename, sheet, class_type = "PixelLocation"):
     book.save(filename)
 
 
-initLetter(letter, pixLoc)
+# grab the current frame
+camera = cv2.VideoCapture(0)
+(grabbed, frame) = camera.read()
+initLetter(frame, pixLoc)
 excelOutput("python_excel_test.xls", '1', pixLoc)

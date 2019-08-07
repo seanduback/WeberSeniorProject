@@ -20,7 +20,7 @@ black = [0,0,0]
 nearBlack = [5,5,5]
 dWinList = []
 #Read in the letter to display as greyscale
-letter = cv2.imread('ScriptL.jpg', 1) 
+letter = cv2.imread('BW_Letter.jpg', 1) 
 DBOffset = 3
 DSOffset = 2
 pixDist = []
@@ -66,48 +66,55 @@ def colorDwin (img, class_type="Dwin"):
 def greenBallTracking (img):
     # this is code I got from the site below
     # https://www.pyimagesearch.com/2015/09/14/ball-tracking-with-opencv/
+    while True:
+        # define the lower and upper boundaries of the "green"
+        greenLower = (55//2, 50, 6)    # lower limit
+        greenUpper = (90//2, 255, 255) # upper limit
+    
+        # grab the referenceto the webcam
+        camera = cv2.VideoCapture(0)
 
-    # define the lower and upper boundaries of the "green"
-    greenLower = (55//2, 50, 6)    # lower limit
-    greenUpper = (90//2, 255, 255) # upper limit
-  
-    # grab the referenceto the webcam
-    camera = cv2.VideoCapture(1)
+        # grab the current frame
+        (grabbed, frame) = camera.read()
 
-    # grab the current frame
-    (grabbed, frame) = camera.read()
+        # resize the frame, blur it, and convert it to the HSV color space
+        blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    # resize the frame, blur it, and convert it to the HSV color space
-    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        # construct a mask for the color "green", then perform
+        # a series of dilations and erosions to remove any small
+        # blobs left in the mask
+        mask = cv2.inRange(hsv, greenLower, greenUpper)
+        mask = cv2.erode(mask, None, iterations=2)
+        mask = cv2.dilate(mask, None, iterations=2)
 
-    # construct a mask for the color "green", then perform
-    # a series of dilations and erosions to remove any small
-    # blobs left in the mask
-    mask = cv2.inRange(hsv, greenLower, greenUpper)
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
+        # find contours in the mask and initialize the current
+        # (x, y) center of the ball
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_SIMPLE)[-2]
+        center = None
+        key = cv2.waitKey(1) & 0xFF
+        # only proceed if at least one contour was found
+        if len(cnts) > 0:
+            # find the largest contour in the mask, then use
+            # centroid
+            c = max(cnts, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            M = cv2.moments(c)
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
-    # find contours in the mask and initialize the current
-    # (x, y) center of the ball
-    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-    cv2.CHAIN_APPROX_SIMPLE)[-2]
-    center = None
+            # only proceed if the radius meets a minimum size
+            if radius > 2:
+                cv2.circle(img, center, 5, (0, 0, 255), -1)
+            # only proceed if the radius meets a minimum size
+        elif key == ord("q"):
+            camera.release()
+            cv2.destroyAllWindows()
+            return
+        else: 
+            cv2.imshow("Frame", frame)
+            camera.release()
 
-    # only proceed if at least one contour was found
-    if len(cnts) > 0:
-        # find the largest contour in the mask, then use
-        # centroid
-        c = max(cnts, key=cv2.contourArea)
-        M = cv2.moments(c)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
-        # only proceed if the radius meets a minimum size
-        if radius > 2:
-            cv2.circle(img, center, 5, (0, 0, 255), -1)
-
-    # cleanup the camera
-    camera.release()
 
 def distance(x0, y0, x1, y1):
     return math.sqrt((x0 - x1)**2 + (y0 - y1)**2)
@@ -165,12 +172,7 @@ dWinList.append(Dwin(36, 665, 635, 910, 935,))
 dWinList.append(Dwin(36, 635, 605, 920, 945,))
 
 
-changeToBW(letter)
 
-key = cv2.waitKey(1) & 0xFF
 # if the q key is pressed, stop the loop
-if key == ord("q"):
-    cv2.destroyAllWindows()
-else: 
-    greenBallTracking(letter)
-    cv2.imshow("Frame", letter)
+greenBallTracking(letter)
+

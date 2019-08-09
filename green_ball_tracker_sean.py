@@ -13,12 +13,13 @@ import cv2
 # define the lower and upper boundaries of the "green"
 # ball in the HSV color space, then initialize the
 # list of tracked points
-greenLower = (0, 0, 0)
-greenUpper = (150, 255, 255)
+greenLower = (0, 120, 70)
+greenUpper = (50, 255, 180)
 pts = deque(maxlen=100)
 # if a video path was not supplied, grab the reference
 # to the webcam
 camera = cv2.VideoCapture(0)
+letter = cv2.imread('BW_Letter.jpg', 1)
 
 
 # keep looping
@@ -51,36 +52,21 @@ while True:
         # centroid
         c = max(cnts, key=cv2.contourArea)
         ((x, y), radius) = cv2.minEnclosingCircle(c)
+        #dWinNum, maxPixDist = getMaxDistance(letter, dWinNum, x, y)
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
         # only proceed if the radius meets a minimum size
-        if radius > 10:
+        if radius > 0:
             # x goes from 0 (camera left) to 600 (camera right) 
+            #print('x: {} \t y: {}  #:{} \t D: {} \t '.format(x, y, dWinNum, maxPixDist))
             print('{} \t x: {} \t y: {}'.format(datetime.datetime.now(), x, y))
-            # draw the circle and centroid on the frame,
-            # then update the list of tracked points
-            cv2.circle(frame, (int(x), int(y)), int(radius),
-                (0, 255, 255), 2)
-            cv2.circle(frame, center, 5, (0, 0, 255), -1)
-
-    # update the points queue
-    pts.appendleft(center)
-
-    # loop over the set of tracked points
-    for i in range(1, len(pts)):
-        # if either of the tracked points are None, ignore
-        # them
-        if pts[i - 1] is None or pts[i] is None:
-            continue
-
-        # otherwise, compute the thickness of the line and
-        # draw the connecting lines
-        thickness = 5
-        cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
+            # draw the centroid on the frame
+            cv2.circle(letter, center, 5, (0, 0, 255), -1)
+            
 
     # show the frame to our screen
-    cv2.imshow("Frame", frame)
+    cv2.imshow("Frame", letter)
     key = cv2.waitKey(1) & 0xFF
 
     # if the q key is pressed, stop the loop

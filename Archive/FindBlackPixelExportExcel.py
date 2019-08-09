@@ -8,6 +8,7 @@ import datetime
 White = [200,200,200]
 Black = [20,20,20]
 nearBlack = [5,5,5]
+pixColor = []
 
 
 
@@ -15,10 +16,14 @@ pixLoc = []
 letter = cv2.imread('ScriptL.jpg', 0) 
 
 class PixelLocation(object):
-    def __init__(self, pixNum=0, yLoc=0, xLoc=0):
-        self.pixNum = pixNum
-        self.yLoc = yLoc
+    def __init__(self, pixNum=0, yLoc=0, xLoc=0, pixR=0, pixG=0, pixB =0):
+        self.pixNum =pixNum
+        self.yLoc= yLoc
         self.xLoc= xLoc
+        self.pixR= pixR
+        self.pixG= pixG
+        self.pixB= pixB
+
 
 def changeToBW (img):
     """Change image to Black and White"""
@@ -53,6 +58,7 @@ def initLetter(img, class_type = "PixelLocation"):
             else:
                 num += 1
                 pixLoc.append(PixelLocation(num, y, x))
+                pixColor[num] = img[y,x]
                 y -= 1
         x += 1  
 
@@ -65,16 +71,20 @@ def excelOutput(filename, sheet, class_type = "PixelLocation"):
     col1_name = 'Pixel Number'
     col2_name = 'Pixel Y value'
     col3_name = 'Pixel X value'
+    col4_name = 'Pixel Color'
 
     sh.write(0, 0, col1_name)
     sh.write(0, 1, col2_name)
     sh.write(0, 2, col3_name)
+    sh.write(0, 3, col4_name)
 
     for pixelLocation in pixLoc:
         i += 1
+        sh.write(i+1, 3, pixColor[i])
         sh.write(i+1, 2, pixelLocation.xLoc)
         sh.write(i+1, 1, pixelLocation.yLoc)
         sh.write(i+1, 0, pixelLocation.pixNum)
+
     
     book.save(filename)
 

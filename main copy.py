@@ -1,11 +1,8 @@
-# from tkinter import Canvas
-# from PIL import ImageTK
-import sys
-import numpy as np 
-import cv2
-from pynput.mouse import Controller
 from collections import deque
+import numpy as np
 import datetime
+import cv2
+
 
 # Notes
 #     Make image black and white
@@ -19,13 +16,19 @@ white = [255,255,255]
 black = [0,0,0]
 nearBlack = [5,5,5]
 dWinList = []
-#Read in the letter to display as greyscale
-letter = cv2.imread('BW_Letter.jpg', 1) 
-DBOffset = 3
-DSOffset = 2
-pixDist = []
-
-
+letter = cv2.imread('BW_Letter.jpg', 1)
+pixDist = [0]
+maxPixDist = []
+# grab the referenceto the webcam
+camera = cv2.VideoCapture(0)
+# define the lower and upper boundaries of the "green"
+colorLower = (0, 120, 70)
+colorUpper = (50, 255, 180)
+winNum = 0
+tLCorner = (643, 183)
+bLCorner = (643, 825)
+tRCorner = (1127, 183)
+bRCorner = (1127, 825)
 
 ############################################################# Class Definitions #################################################
 class Dwin(object):
@@ -37,20 +40,7 @@ class Dwin(object):
         self.xmax = xmax
         self.direction = direction
 
-
 ############################################################# Functions ###########################################
-def changeToBW (img):
-    """Change image to Black and White"""
-    # find the height, width, of the image
-    ys = img.shape[0]
-    xs = img.shape[1]
-    #iterate over entire image starting at top left 
-    for x in range(0, xs):
-        for y in range(0, ys):
-            if np.allclose((img[y,x]), nearBlack, 5, 5): #if a pixel is not black/near black make it true white
-                img[y,x] = black
-            else: #if a pixel is black/near black make it true black
-                img[y,x] = white
 
 def colorDwin (img, class_type="Dwin"):
     for Dwin in dWinList:
@@ -63,76 +53,20 @@ def colorDwin (img, class_type="Dwin"):
                 # else:
                 #     img[y, x] = 0
 
-def greenBallTracking (img):
-    # this is code I got from the site below
-    # https://www.pyimagesearch.com/2015/09/14/ball-tracking-with-opencv/
-    while True:
-        # define the lower and upper boundaries of the "green"
-        greenLower = (0, 120, 70)
-        greenUpper = (50, 255, 180)
-    
-        # grab the referenceto the webcam
-        camera = cv2.VideoCapture(0)
-
-        # grab the current frame
-        (grabbed, frame) = camera.read()
-
-        # resize the frame, blur it, and convert it to the HSV color space
-        blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-        # construct a mask for the color "green", then perform
-        # a series of dilations and erosions to remove any small
-        # blobs left in the mask
-        mask = cv2.inRange(hsv, greenLower, greenUpper)
-        mask = cv2.erode(mask, None, iterations=2)
-        mask = cv2.dilate(mask, None, iterations=2)
-
-        # find contours in the mask and initialize the current
-        # (x, y) center of the ball
-        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-        cv2.CHAIN_APPROX_SIMPLE)[-2]
-        center = None
-        key = cv2.waitKey(1) & 0xFF
-        # only proceed if at least one contour was found
-        if len(cnts) > 0:
-            # find the largest contour in the mask, then use
-            # centroid
-            c = max(cnts, key=cv2.contourArea)
-            ((x, y), radius) = cv2.minEnclosingCircle(c)
-            M = cv2.moments(c)
-            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
-            # only proceed if the radius meets a minimum size
-            if radius > 0:
-                # x goes from 0 (camera left) to 600 (camera right) 
-                print('{} \t x: {} \t y: {}'.format(datetime.datetime.now(), x, y))
-                # draw the circle and centroid on the frame,
-                # then update the list of tracked points
-                cv2.circle(frame, (int(x), int(y)), int(radius),
-                    (0, 255, 255), -1)
-                cv2.circle(frame, center, 5, (0, 0, 255), -1)
-            # only proceed if the radius meets a minimum size
-        elif key == ord("q"):
-            camera.release()
-            cv2.destroyAllWindows()
-            return
-        else: 
-            cv2.imshow("Frame", frame)
-            camera.release()
-
-
 def distance(x0, y0, x1, y1):
     return math.sqrt((x0 - x1)**2 + (y0 - y1)**2)
 
-def getMaxDistance (img, dWinNum, inputX, inputY):
+def getMaxDistance (img, dWinNum, inputX, inputY, class_type="Dwin"):
+   
     for i in range (dWinNum, dWinNum + 1):
-        for x in range (Dwin(i).xmin, Dwin(i).xmax):
-            for y in range (Dwin(i).ymin, Dwin(i).ymax, -1): 
-                if img[y, x] == black:
+        for xd in dWinList (Dwin(i).xmin, Dwin(i).xmax):
+            for yd in range (Dwin(i).ymin, Dwin(i).ymax, -1): 
+                if img[yd, xd] == black:
                     count += 1
-                    pixDist[count] = distance(x, y, inputX, inputY)
+                    pixDist[count] = distance(xd, yd, inputX, inputY)
+        maxPixDist.append(i)
         maxPixDist[i] = max(pixDist)
+    
     if maxPixDist[i+1] > maxPixDist[i]:
         return dWinNum+1, maxPixDist[i+1]
     else:
@@ -179,6 +113,55 @@ dWinList.append(Dwin(36, 635, 605, 920, 945,))
 
 
 
-# if the q key is pressed, stop the loop
-greenBallTracking(letter)
+cv2.line(letter, tLCorner, bLCorner, 5)
+cv2.line(letter, tRCorner, tLCorner, 5)
+cv2.line(letter, tRCorner, bRCorner, 5)
+cv2.line(letter, bRCorner, bLCorner, 5)
+
+while True:
+    # grab the current frame
+    (grabbed, frame) = camera.read()
+
+    # resize the frame, blur it, and convert it to the HSV color space
+    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # construct a mask for the color then perform
+    # a series of dilations and erosions to remove any small
+    # blobs left in the mask
+    mask = cv2.inRange(hsv, colorLower, colorUpper)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
+
+    # find contours in the mask and initialize the current
+    # (x, y) center of the ball
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
+    cv2.CHAIN_APPROX_SIMPLE)[-2]
+    center = None
+    
+    # only proceed if at least one contour was found
+    if len(cnts) > 0:
+        # find the largest contour in the mask, then use
+        # centroid
+        c = max(cnts, key=cv2.contourArea)
+        ((x, y), radius) = cv2.minEnclosingCircle(c)
+        #winNum, pixDistance = getMaxDistance(letter, winNum, x, y)
+        M = cv2.moments(c)
+        centerX = (int(M["m10"] / M["m00"]) + 645)
+        centerY = (int(M["m01"] / M["m00"]) + 185)
+
+        cv2.circle(letter, (centerX, centerY), 2, (0, 0, 255), -1)
+
+    cv2.imshow("Learn to Write!", letter)
+    key = cv2.waitKey(1) & 0xFF
+
+    # if the q key is pressed, stop the loop
+    if key == ord("q"):
+        break
+
+# if the q key is pressed, stop the loop   
+camera.release()
+cv2.destroyAllWindows()
+
+
 

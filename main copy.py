@@ -65,25 +65,27 @@ def getMinDistance (img, dWinNum, inputX, inputY, class_type="Dwin"):
         if Dwin.idnum == dWinNum:
             for x in range(Dwin.xmin, Dwin.xmax):
                 for y in range(Dwin.ymin, Dwin.ymax, -1):
-                    if img[y, x] == black:
-                        countFrist += 1
-                        pixDist[countFirst] = distance(x, y, inputX, inputY)
-            minPixDist[dWinNum].append(min(pixDist))
+                    if np.array_equal(img[y, x], black):
+                        countFirst += 1
+                        pixDist.insert(countFirst, distance(x, y, inputX, inputY))
+                        #pixDist[countFirst].append(distance(x, y, inputX, inputY))
+            minPixDist.insert(dWinNum, min(pixDist)) 
+            #minPixDist[dWinNum].append(min(pixDist))
             
         elif Dwin.idnum == (dWinNum+1):
             for x in range(Dwin.xmin, Dwin.xmax):
                 for y in range(Dwin.ymin, Dwin.ymax, -1):
-                    if img[y, x] == black:
+                    if  np.array_equal(img[y, x],black):
                         countSecond += 1
-                        pixDist[countSecond] = distance(x, y, inputX, inputY)
-            minPixDist[dWinNum+1].append(min(pixDist))
+                        pixDist.insert(countSecond, distance(x, y, inputX, inputY))
+            minPixDist.insert(dWinNum+1, min(pixDist)) 
 
     if minPixDist[dWinNum+1] < minPixDist[dWinNum]:
-        print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (Dwin.idnum, maxPixDist[dWinNum+1]))
+        print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (Dwin.idnum, minPixDist[dWinNum+1]))
         
         return dWinNum+1, minPixDist[dWinNum+1]
     else:
-        print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (Dwin.idnum, maxPixDist[dWinNum]))
+        print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (Dwin.idnum, minPixDist[dWinNum]))
         return dWinNum, minPixDist[dWinNum]
 
     # for i in range (dWinNum, dWinNum + 1):
@@ -175,10 +177,9 @@ while True:
         M = cv2.moments(c)
         centerX = (int(M["m10"] / M["m00"]) + 645)
         centerY = (int(M["m01"] / M["m00"]) + 185)
-        #cv2.circle(letter, (centerX, centerY), 2, (0, 0, 255), -1)
+        cv2.circle(letter, (centerX, centerY), 2, (0, 0, 255), -1)
         winNum, pixDistance = getMinDistance(letter, winNum, x, y)
 
-    colorDwin(letter, dWinList)
     cv2.imshow("Learn to Write!", letter)
     key = cv2.waitKey(1) & 0xFF
 

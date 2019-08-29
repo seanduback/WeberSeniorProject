@@ -180,5 +180,5 @@ dWinList.append(Dwin(36, 635, 605, 920, 945,))
 
 
 # if the q key is pressed, stop the loop
-colorDwin(letter, dWinList)
-cv2.imshow("Frame", letter)
+greenBallTracking(letter)
+

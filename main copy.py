@@ -2,6 +2,7 @@ from collections import deque
 import numpy as np
 import datetime
 import cv2
+import math
 
 
 # Notes
@@ -17,8 +18,8 @@ black = [0,0,0]
 nearBlack = [5,5,5]
 dWinList = []
 letter = cv2.imread('BW_Letter.jpg', 1)
-pixDist = [0]
-maxPixDist = []
+pixDist = []
+minPixDist = []
 # grab the referenceto the webcam
 camera = cv2.VideoCapture(0)
 # define the lower and upper boundaries of the "green"
@@ -56,21 +57,47 @@ def colorDwin (img, class_type="Dwin"):
 def distance(x0, y0, x1, y1):
     return math.sqrt((x0 - x1)**2 + (y0 - y1)**2)
 
-def getMaxDistance (img, dWinNum, inputX, inputY, class_type="Dwin"):
-   
-    for i in range (dWinNum, dWinNum + 1):
-        for xd in dWinList (Dwin(i).xmin, Dwin(i).xmax):
-            for yd in range (Dwin(i).ymin, Dwin(i).ymax, -1): 
-                if img[yd, xd] == black:
-                    count += 1
-                    pixDist[count] = distance(xd, yd, inputX, inputY)
-        maxPixDist.append(i)
-        maxPixDist[i] = max(pixDist)
-    
-    if maxPixDist[i+1] > maxPixDist[i]:
-        return dWinNum+1, maxPixDist[i+1]
+def getMinDistance (img, dWinNum, inputX, inputY, class_type="Dwin"):
+    countFirst = 0
+    countSecond = 0
+
+    for Dwin in dWinList:
+        if Dwin.idnum == dWinNum:
+            for x in range(Dwin.xmin, Dwin.xmax):
+                for y in range(Dwin.ymin, Dwin.ymax, -1):
+                    if img[y, x] == black:
+                        countFrist += 1
+                        pixDist[countFirst] = distance(x, y, inputX, inputY)
+            minPixDist[dWinNum].append(min(pixDist))
+            
+        elif Dwin.idnum == (dWinNum+1):
+            for x in range(Dwin.xmin, Dwin.xmax):
+                for y in range(Dwin.ymin, Dwin.ymax, -1):
+                    if img[y, x] == black:
+                        countSecond += 1
+                        pixDist[countSecond] = distance(x, y, inputX, inputY)
+            minPixDist[dWinNum+1].append(min(pixDist))
+
+    if minPixDist[dWinNum+1] < minPixDist[dWinNum]:
+        print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (Dwin.idnum, maxPixDist[dWinNum+1]))
+        
+        return dWinNum+1, minPixDist[dWinNum+1]
     else:
-        return dWinNum, maxPixDist[i]                 
+        print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (Dwin.idnum, maxPixDist[dWinNum]))
+        return dWinNum, minPixDist[dWinNum]
+
+    # for i in range (dWinNum, dWinNum + 1):
+    #     for xd in dWinList (Dwin(i).xmin, Dwin(i).xmax):
+    #         for yd in range (Dwin(i).ymin, Dwin(i).ymax, -1): 
+    #             if img[yd, xd] == black:
+    #                 count += 1
+    #                 pixDist[count] = distance(xd, yd, inputX, inputY)
+    #     maxPixDist[i].append(max(pixDist))
+    
+    # if maxPixDist[i+1] > maxPixDist[i]:
+    #     return dWinNum+1, maxPixDist[i+1]
+    # else:
+    #     return dWinNum, maxPixDist[i]                 
                     
 
 dWinList.append(Dwin(0, 613, 583, 831, 843,))
@@ -121,6 +148,7 @@ cv2.line(letter, bRCorner, bLCorner, 5)
 while True:
     # grab the current frame
     (grabbed, frame) = camera.read()
+    frame = cv2.flip(frame, 1)
 
     # resize the frame, blur it, and convert it to the HSV color space
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
@@ -135,8 +163,7 @@ while True:
 
     # find contours in the mask and initialize the current
     # (x, y) center of the ball
-    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-    cv2.CHAIN_APPROX_SIMPLE)[-2]
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
     
     # only proceed if at least one contour was found
@@ -145,13 +172,13 @@ while True:
         # centroid
         c = max(cnts, key=cv2.contourArea)
         ((x, y), radius) = cv2.minEnclosingCircle(c)
-        #winNum, pixDistance = getMaxDistance(letter, winNum, x, y)
         M = cv2.moments(c)
         centerX = (int(M["m10"] / M["m00"]) + 645)
         centerY = (int(M["m01"] / M["m00"]) + 185)
+        #cv2.circle(letter, (centerX, centerY), 2, (0, 0, 255), -1)
+        winNum, pixDistance = getMinDistance(letter, winNum, x, y)
 
-        cv2.circle(letter, (centerX, centerY), 2, (0, 0, 255), -1)
-
+    colorDwin(letter, dWinList)
     cv2.imshow("Learn to Write!", letter)
     key = cv2.waitKey(1) & 0xFF
 

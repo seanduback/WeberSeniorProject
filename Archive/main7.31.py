@@ -157,9 +157,9 @@ dWinList.append(Dwin(36, 665, 635, 910, 935,))
 dWinList.append(Dwin(36, 635, 605, 920, 945,))
 
 
-changeToBW(letter)
-#colorDwin(letter, dWinList)
-# cv2.imshow('title', letter)
-draw(letter)
+#changeToBW(letter)
+colorDwin(letter, dWinList)
+cv2.imshow('title', letter)
+#draw(letter)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()

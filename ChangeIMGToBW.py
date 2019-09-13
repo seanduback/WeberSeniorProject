@@ -5,7 +5,7 @@ white = [255,255,255]
 black = [0,0,0]
 nearBlack = [5,5,5]
 
-letter = cv2.imread('ScriptL.jpg', 1) 
+letter = cv2.imread('ScriptLsmall.jpg', 1) 
 def changeToBW (img):
     """Change image to Black and White"""
     # find the height, width, of the image
@@ -20,4 +20,4 @@ def changeToBW (img):
                 img[y,x] = white
 
 changeToBW(letter)
-cv2.imwrite("BW_Letter.jpg", letter)
+cv2.imwrite("BW_ScriptLsmall.jpg", letter)

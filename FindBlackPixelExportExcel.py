@@ -13,7 +13,7 @@ pixColor = []
 
 
 pixLoc = []
-letter = cv2.imread('ScriptL.jpg', 0) 
+letter = cv2.imread('BW_ScriptLsmall.jpg', 0) 
 
 class PixelLocation(object):
     def __init__(self, pixNum=0, yLoc=0, xLoc=0, pixR=0, pixG=0, pixB =0):
@@ -24,7 +24,7 @@ class PixelLocation(object):
         self.pixG= pixG
         self.pixB= pixB
 
-
+ 
 def changeToBW (img):
     """Change image to Black and White"""
     # find the height, width, of the image
@@ -90,7 +90,6 @@ def excelOutput(filename, sheet, class_type = "PixelLocation"):
 
 
 # grab the current frame
-camera = cv2.VideoCapture(0)
-(grabbed, frame) = camera.read()
-initLetter(frame, pixLoc)
+
+initLetter(letter, pixLoc)
 excelOutput("python_excel_test.xls", '1', pixLoc)

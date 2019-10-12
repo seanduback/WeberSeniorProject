@@ -232,7 +232,7 @@ while True:
         centerX = (int(M["m10"] / M["m00"])+50)
         centerY = (int(M["m01"] / M["m00"])+50)
         if centerX < 800 and centerY < 600: 
-            if startFlag == False:
+            if startFlag == False: #Wait until imput is in Dwin 0 to start game
                 cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
                 startFlag = start(letter, x, y)
             else:
@@ -241,10 +241,71 @@ while True:
                     letter = cv2.imread('bw_image.png', 1)
                     winNum, pixDistance = getMinDistance(letter, winNum, x, y)
                     cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
-                else:
+                else: #Play the game
                     winNum, pixDistance = getMinDistance(letter, winNum, x, y)
                     cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
-            
+                    #send distance to arduino here!
+                        #windows code options  
+               
+                            #https://stackoverflow.com/questions/36503170/python-communication-to-arduino-via-bluetooth
+                            # s = serial.Serial("COM3",9600,timeout = 2)
+                            # s.write(bytes("hello!",'utf-8'))
+                            #code uses HC-06 bluetooth module
+
+                            #https://github.com/huberf/Computer-to-Arduino-Bluetooth/blob/master/LightGUI.py
+                            # sock = bluetooth.BluetoothSocket( bluetooth.RFCOMM )
+                            # def disconnect(self):
+                            #     #Close socket connection to device
+                            #     self.sock.close()
+                            # def on(self):
+                            #     #Send 'H' which the Arduino
+                            #     #detects as turning the light on
+                            #     data = "H"
+                            #     self.sock.send(data)
+                        #Pi code options 
+                            #http://www.uugear.com/portfolio/bluetooth-communication-between-raspberry-pi-and-arduino/
+                            # /usr/bin/python
+                            # import serial
+                            # from time import sleep
+                            # bluetoothSerial = serial.Serial( "/dev/rfcomm1", baudrate=9600 )
+                            # count = None
+                            # while count == None:
+                            #     try:
+                            #         count = int(raw_input( "Please enter the number of times to blink the L$
+                            #     except:
+                            #         pass    # Ignore any errors that may occur and try again
+
+                            #Arduino code
+                                # int ledPin = 13;
+                                # void setup() {
+                                #   Serial.begin( 9600 );    // 9600 is the default baud rate for the serial Bluetooth module
+                                # }
+                                # void loop() {
+                                #   // listen for the data
+                                #   if ( Serial.available() > 0 ) {
+                                #     // read a numbers from serial port
+                                #     int count = Serial.parseInt();
+                                #      // print out the received number
+                                #     if (count > 0) {
+                                #         Serial.print("You have input: ");
+                                #         Serial.println(String(count));
+                                #         // blink the LED
+                                #         blinkLED(count);
+                                #     }
+                                #   }
+                                # }
+                                # void blinkLED(int count) {
+                                #   for (int i=0; i< count; i++) {
+                                #     digitalWrite(ledPin, HIGH);
+                                #     delay(500);
+                                #     digitalWrite(ledPin, LOW);
+                                #     delay(500);
+                                #   } 
+                                # }
+                                # bluetoothSerial.write( str(count) )
+                                # print bluetoothSerial.readline()          
+                        # https://medium.com/@mahesh_joshi/raspberry-pi-3-and-arduino-communication-via-bluetooth-hc-05-5d7b6f162ab3     
+                        # http://blog.whatgeek.com.pt/2015/09/bluetooth-communication-between-raspberry-pi-and-arduino/      
 
     cv2.imshow("Learn to Write!", letter)
     key = cv2.waitKey(1) & 0xFF

@@ -8,7 +8,8 @@ import math
 # Notes
 #     Make image black and white
 #     Make windows
-#     Get input from mouse
+#     Get input from camera
+#     Wait until input is inside window 1 to start
 #     On start begin comparing window 1 and 2 to mouse
 #     Move to comparing window 2 and 3 when the distance to any point in window 2 is less than the distance to any point in window 1
 
@@ -31,6 +32,8 @@ tLCorner = (350, 160)
 bLCorner = (350, 500)
 tRCorner = (450, 160)
 bRCorner = (450, 500)
+startFlag = False
+oldStartFlag = False 
 
 ############################################################# Class Definitions #################################################
 
@@ -42,10 +45,34 @@ class Dwin(object):
         self.xmin = xmin
         self.xmax = xmax
 
+# class oldXY(object):
+#     def __init__(self, x0=0, y0=0, x1=0, y1=0, x2=0, y2=0, x3=0, y3=0, x4=0, y4=0,):
+#         self.x0 = x0
+#         self.y0 = y0
+#         self.x1 = x1
+#         self.y1 = y1
+#         self.x2 = x2
+#         self.y2 = y2
+#         self.x3 = x3
+#         self.y3 = y3
+#         self.x4 = x4
+#         self.y4 = y4
+
+
+
 ############################################################# Functions ###########################################
 
 def distance(x0, y0, x1, y1):
     return math.sqrt((x0 - x1)**2 + (y0 - y1)**2)
+
+def start (img, inputX, inputY):
+    
+     for x in range(dWinList[0].xmin, dWinList[0].xmax):
+        for y in range(dWinList[0].ymin, dWinList[0].ymax, -1):
+            if np.array_equal(img[y, x], black):
+                return True
+     return False
+
 
 def getMinDistance (img, dWinNum, inputX, inputY):
     countFirst = 0
@@ -82,6 +109,7 @@ def getMinDistance (img, dWinNum, inputX, inputY):
             return dWinNum, minPixDist[dWinNum]
 
 def colorDwin (img, class_type="Dwin"):
+    #func used for debugging 
     for Dwin in dWinList:
         print ("Window#= %s, xmin=%s, xmax= %s, ymin= %s ymax= %s"% (Dwin.idnum, Dwin.xmin, Dwin.xmax, Dwin.ymin, Dwin.ymax))
         for x in range(Dwin.xmin, Dwin.xmax):
@@ -92,6 +120,25 @@ def colorDwin (img, class_type="Dwin"):
                 # else:
                 #     img[y, x] = 0
 
+
+# def shortTail(img, centerX, centerY):
+#     oldXY.x0 = centerX
+#     oldXY.y0 = centerY
+#     oldXY.x1 = oldXY.x0
+#     oldXY.y1 = oldXY.y0
+#     oldXY.x2 = oldXY.x1
+#     oldXY.y2 = oldXY.y1
+#     oldXY.x3 = oldXY.x2
+#     oldXY.y3 = oldXY.y2
+#     oldXY.x4 = oldXY.x3
+#     oldXY.y4 = oldXY.y3
+
+#     cv2.circle(img, (centerX, centerY), 1, (0, 0, 255), -1)
+#     cv2.circle(img, (oldXY.x0, ), 1, (0, 0, 255), -1)
+#     cv2.circle(img, (centerX, centerY), 1, (0, 0, 255), -1)
+#     cv2.circle(img, (centerX, centerY), 1, (0, 0, 255), -1)
+#     cv2.circle(img, (centerX, centerY), 1, (0, 0, 255), -1)
+#     cv2.circle(img, (centerX, centerY), 1, (0, 0, 255), -1)
 
 def init ():
     #make Distance windows
@@ -184,9 +231,19 @@ while True:
         M = cv2.moments(c)
         centerX = (int(M["m10"] / M["m00"])+50)
         centerY = (int(M["m01"] / M["m00"])+50)
-        if centerX < 800 and centerY < 600:
-            winNum, pixDistance = getMinDistance(letter, winNum, x, y)
-            cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+        if centerX < 800 and centerY < 600: 
+            if startFlag == False:
+                cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+                startFlag = start(letter, x, y)
+            else:
+                if oldStartFlag == False: #Clean the img on game start 
+                    oldStartFlag = True 
+                    letter = cv2.imread('bw_image.png', 1)
+                    winNum, pixDistance = getMinDistance(letter, winNum, x, y)
+                    cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+                else:
+                    winNum, pixDistance = getMinDistance(letter, winNum, x, y)
+                    cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
             
 
     cv2.imshow("Learn to Write!", letter)

@@ -75,8 +75,8 @@ def start (img, inputX, inputY):
         #     return True
         if x == int(inputX):
             for y in range(dWinList[0].ymin, dWinList[0].ymax, -1):
-                if y == inputY:
-                    if np.array_equal(img[inputY, inputX], black):
+                if y == int(inputY):
+                    if np.array_equal(img[y, x], black):
                         return True
     return False
 
@@ -88,21 +88,21 @@ def getMinDistance (img, dWinNum, inputX, inputY):
     # for Dwin in dWinList:
     #     if Dwin.idnum == dWinNum:
     for x in range(dWinList[dWinNum].xmin, dWinList[dWinNum].xmax):
-        if x == inputX: #inputX and x same type ???
+        if x == int(inputX): #inputX and x same type ???
             for y in range(dWinList[dWinNum].ymin, dWinList[dWinNum].ymax, -1):
-                if y == inputY:
-                    if np.array_equal(img[inputY, inputX], black):
+                if y == int(inputY):
+                    if np.array_equal(img[y, x], black):
                         countFirst += 1
-                        pixDistFirst.insert(countFirst, distance(x, y, inputX, inputY))
+                        pixDistFirst.insert(countFirst, distance(x, y, int(inputX), int(inputY)))
         
     #elif Dwin.idnum == (dWinNum+1):
     for x in range(dWinList[dWinNum+1].xmin, dWinList[dWinNum+1].xmax):
-        if x == inputX:
+        if x == int(inputX):
             for y in range(dWinList[dWinNum+1].ymin, dWinList[dWinNum+1].ymax, -1):
-                if y == inputY:
-                    if  np.array_equal(img[inputY, inputX],black):
+                if y == int(inputY):
+                    if  np.array_equal(img[y, x],black):
                         countSecond += 1
-                        pixDistSecond.insert(countSecond, distance(x, y, inputX, inputY))
+                        pixDistSecond.insert(countSecond, distance(x, y, int(inputX), int(inputY)))
     
     if countFirst != 0: minPixDist.update({dWinNum: min(pixDistFirst)})
     if countSecond != 0: minPixDist.update({dWinNum+1: min(pixDistSecond)})

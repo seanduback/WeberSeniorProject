@@ -67,11 +67,16 @@ def distance(x0, y0, x1, y1):
 
 def start (img, inputX, inputY):
     
-     for x in range(dWinList[0].xmin, dWinList[0].xmax):
-        for y in range(dWinList[0].ymin, dWinList[0].ymax, -1):
-            if np.array_equal(img[y, x], black):
-                return True
-     return False
+    for x in range(dWinList[0].xmin, dWinList[0].xmax):
+        # print(float(inputX))
+        # if inputX == 336:
+        #     return True
+        if x == int(inputX):
+            for y in range(dWinList[0].ymin, dWinList[0].ymax, -1):
+                if y == inputY:
+                    if np.array_equal(img[inputY, inputX], black):
+                        return True
+    return False
 
 
 def getMinDistance (img, dWinNum, inputX, inputY):
@@ -81,17 +86,21 @@ def getMinDistance (img, dWinNum, inputX, inputY):
     # for Dwin in dWinList:
     #     if Dwin.idnum == dWinNum:
     for x in range(dWinList[dWinNum].xmin, dWinList[dWinNum].xmax):
-        for y in range(dWinList[dWinNum].ymin, dWinList[dWinNum].ymax, -1):
-            if np.array_equal(img[y, x], black):
-                countFirst += 1
-                pixDistFirst.insert(countFirst, distance(x, y, inputX, inputY))
+        if x == inputX:
+            for y in range(dWinList[dWinNum].ymin, dWinList[dWinNum].ymax, -1):
+                if y == inputY:
+                    if np.array_equal(img[inputY, inputX], black):
+                        countFirst += 1
+                        pixDistFirst.insert(countFirst, distance(x, y, inputX, inputY))
         
     #elif Dwin.idnum == (dWinNum+1):
     for x in range(dWinList[dWinNum+1].xmin, dWinList[dWinNum+1].xmax):
-        for y in range(dWinList[dWinNum+1].ymin, dWinList[dWinNum+1].ymax, -1):
-            if  np.array_equal(img[y, x],black):
-                countSecond += 1
-                pixDistSecond.insert(countSecond, distance(x, y, inputX, inputY))
+        if x == inputX:
+            for y in range(dWinList[dWinNum+1].ymin, dWinList[dWinNum+1].ymax, -1):
+                if y == inputY:
+                    if  np.array_equal(img[inputY, inputX],black):
+                        countSecond += 1
+                        pixDistSecond.insert(countSecond, distance(x, y, inputX, inputY))
     
     if countFirst != 0: minPixDist.update({dWinNum: min(pixDistFirst)})
     if countSecond != 0: minPixDist.update({dWinNum+1: min(pixDistSecond)})

@@ -241,18 +241,23 @@ while True:
         centerX = (int(M["m10"] / M["m00"])+50)
         centerY = (int(M["m01"] / M["m00"])+50)
         if centerX < 800 and centerY < 600: 
-            if startFlag == False: #Wait until imput is in Dwin 0 to start game
-                cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
-                startFlag = start(letter, x, y)
-            else:
-                if oldStartFlag == False: #Clean the img on game start 
-                    oldStartFlag = True 
-                    letter = cv2.imread('bw_image.png', 1)
-                    winNum, pixDistance = getMinDistance(letter, winNum, x, y)
-                    cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
-                else: #Play the game
-                    winNum, pixDistance = getMinDistance(letter, winNum, x, y)
-                    cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+
+            winNum, pixDistance = getMinDistance(letter, winNum, x, y)
+            cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+
+
+            # if startFlag == False: #Wait until imput is in Dwin 0 to start game
+            #     cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+            #     startFlag = start(letter, x, y)
+            # else:
+            #     if oldStartFlag == False: #Clean the img on game start 
+            #         oldStartFlag = True 
+            #         letter = cv2.imread('bw_image.png', 1)
+            #         winNum, pixDistance = getMinDistance(letter, winNum, x, y)
+            #         cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+            #     else: #Play the game
+            #         winNum, pixDistance = getMinDistance(letter, winNum, x, y)
+            #         cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
                     #send distance to arduino here!
                         #windows code options  
                
@@ -305,7 +310,7 @@ while True:
                                 # }
                                 # void blinkLED(int count) {
                                 #   for (int i=0; i< count; i++) {
-                                #     digitalWrite(ledPin, HIGH);
+                                #     digitalWrite(ledPin, HIGH); 
                                 #     delay(500);
                                 #     digitalWrite(ledPin, LOW);
                                 #     delay(500);

@@ -3,6 +3,8 @@ import numpy as np
 import datetime
 import cv2
 import math
+from Tkinter import *
+import bluetooth
 
 
 # Notes
@@ -86,7 +88,7 @@ def getMinDistance (img, dWinNum, inputX, inputY):
     # for Dwin in dWinList:
     #     if Dwin.idnum == dWinNum:
     for x in range(dWinList[dWinNum].xmin, dWinList[dWinNum].xmax):
-        if x == inputX:
+        if x == inputX: #inputX and x same type ???
             for y in range(dWinList[dWinNum].ymin, dWinList[dWinNum].ymax, -1):
                 if y == inputY:
                     if np.array_equal(img[inputY, inputX], black):
@@ -202,6 +204,7 @@ def init ():
 init()
 #colorDwin(letter, dWinList)
 while True:
+    #ArduinoBT = serial.Serial("COM3",9600,timeout = 2)
     cv2.imshow("Learn to Write!", letter)
     key = cv2.waitKey(1) & 0xFF
 
@@ -259,11 +262,11 @@ while True:
             #         winNum, pixDistance = getMinDistance(letter, winNum, x, y)
             #         cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
                     #send distance to arduino here!
+                    #ArduinoBT.write(pixDistance)
                         #windows code options  
                
                             #https://stackoverflow.com/questions/36503170/python-communication-to-arduino-via-bluetooth
-                            # s = serial.Serial("COM3",9600,timeout = 2)
-                            # s.write(bytes("hello!",'utf-8'))
+                            # ArduinoBT.write(bytes("hello!",'utf-8'))
                             #code uses HC-06 bluetooth module
 
                             #https://github.com/huberf/Computer-to-Arduino-Bluetooth/blob/master/LightGUI.py

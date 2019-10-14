@@ -3,8 +3,10 @@ import numpy as np
 import datetime
 import cv2
 import math
-from Tkinter import *
-import bluetooth
+# =============================================================================
+# from Tkinter import *
+# import bluetooth
+# =============================================================================
 
 
 # Notes
@@ -21,6 +23,7 @@ black = [0,0,0]
 nearBlack = [5,5,5]
 dWinList = []
 letter = cv2.imread('bw_image.png', 1)
+pixDistance = 0
 pixDistFirst = []
 pixDistSecond = []
 minPixDist = {}

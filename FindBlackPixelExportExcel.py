@@ -1,9 +1,6 @@
-import sys
 import numpy as np 
 import cv2
 import xlwt
-from collections import deque
-import datetime
 
 White = [255,255,255]
 Black = [0,0,0]

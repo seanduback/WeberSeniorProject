@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 import math
+import paho.mqtt.client as mqtt
+import time
 # =============================================================================
 # from Tkinter import *
 # import bluetooth
@@ -14,6 +16,9 @@ import math
 #     Wait until input is inside window 1 to start
 #     On start begin comparing window 1 and 2 to mouse
 #     Move to comparing window 2 and 3 when the distance to any point in window 2 is less than the distance to any point in window 1
+
+
+#  send 2 numbers, send direction as 1-4 and distance as 1-100 
 
 ############################################################ Global Variables ###############################################
 white = [255,255,255]
@@ -127,17 +132,17 @@ def getDirection(inputX, inputY, x, y):
     yDistance = y - inputY
     xDistance = x - inputX
     if abs(yDistance) >= abs(xDistance):
-        if y > inputY: return "bottomMotor"
-        else: return "topMotor"
+        if y >inputY: return 3
+        else: return 1
     else:
-        if x > inputX: return "rightMotor"
-        else: return "leftMotor"
+        if x > inputX: return 4
+        else: return 2
     
     
 def getMinDistance (img, dWinNum, inputX, inputY, score):
     FirstKey = 0 #used as flags for distance to not update min distince if no new values
     SecondKey = 0 #used as flags for distance to not update min distince if no new values
-    Direction = "No Direction"
+    Direction = 0
     #print("DwinNum = %s"%(dWinNum))
     if dWinNum == 36: #if the game is over return end game true
         return 36, 0, True
@@ -145,6 +150,7 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
         for x in range(dWinList[dWinNum].xmin, dWinList[dWinNum].xmax):
             for y in range(dWinList[dWinNum].ymin, dWinList[dWinNum].ymax, -1):
                 if np.array_equal(img[y, x], black):
+                     #numpy.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)[source]
                     if np.array_equal(img[y,x], [inputY, inputX]): #if the input is on a letter pixel add one to score and return
                            score = score +1
                            return dWinNum, 0, False, score, Direction
@@ -195,6 +201,9 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
 
 init()
 #colorDwin(letter, dWinList)
+broker= "test.mosquitto.org"
+client = mqtt.Client("computer")
+client.connect(broker)
 while True:
     cv2.imshow("Learn to Write!", letter)
     key = cv2.waitKey(1) & 0xFF
@@ -238,12 +247,14 @@ while True:
                 else: #Play the game
                     winNum, pixDistance, endFlag, score, direction = getMinDistance(letter, winNum, centerX, centerY, score)
                     cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+                    msg = ("{0},{1}".format(direction, pixDistance))
+                    client.publish("motors",msg)
                     #send distance to arduino here!
-                    #ArduinoBT.write(pixDistance)
+    
 
     cv2.imshow("Learn to Write!", letter)
     key = cv2.waitKey(1) & 0xFF
-
+    #client.loop_forever()
     # if the q key is pressed, stop the loop
     if key == ord("q") or endFlag == True:
         print("Your Score is %s letter pixels hit out of 611 letter pixels"%(score))

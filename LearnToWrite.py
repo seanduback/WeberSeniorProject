@@ -150,8 +150,10 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
         for x in range(dWinList[dWinNum].xmin, dWinList[dWinNum].xmax):
             for y in range(dWinList[dWinNum].ymin, dWinList[dWinNum].ymax, -1):
                 if np.array_equal(img[y, x], black):
-                     #numpy.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)[source]
-                    if np.array_equal(img[y,x], [inputY, inputX]): #if the input is on a letter pixel add one to score and return
+                    yDistance = y - inputY
+                    xDistance = x - inputX
+                     #numpy.allclose(a, b, rtol=0, atol=3, equal_nan=False)
+                    if yDistance <= 3 and xDistance <= 3:
                            score = score +1
                            return dWinNum, 0, False, score, Direction
                     else:    

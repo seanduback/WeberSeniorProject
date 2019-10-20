@@ -34,7 +34,7 @@ pixDirSecond = {}
 pixDistStart = 100
 minPixDist = {}
 # grab the referenceto the webcam
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(1)
 # define the lower and upper boundaries of the "green"
 colorLower = (0, 120, 70)
 colorUpper = (50, 255, 180)
@@ -128,7 +128,7 @@ def start (img, inputX, inputY):
                     return True
     return False
 
-def getDirection(inputX, inputY, x, y):
+def getdirection(inputX, inputY, x, y):
     yDistance = y - inputY
     xDistance = x - inputX
     if abs(yDistance) >= abs(xDistance):
@@ -142,7 +142,7 @@ def getDirection(inputX, inputY, x, y):
 def getMinDistance (img, dWinNum, inputX, inputY, score):
     FirstKey = 0 #used as flags for distance to not update min distince if no new values
     SecondKey = 0 #used as flags for distance to not update min distince if no new values
-    Direction = 0
+    direction = 0
     #print("DwinNum = %s"%(dWinNum))
     if dWinNum == 36: #if the game is over return end game true
         return 36, 0, True
@@ -150,15 +150,15 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
         for x in range(dWinList[dWinNum].xmin, dWinList[dWinNum].xmax):
             for y in range(dWinList[dWinNum].ymin, dWinList[dWinNum].ymax, -1):
                 if np.array_equal(img[y, x], black):
-                     #numpy.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)[source]
+                    #numpy.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)[source]
                     if np.array_equal(img[y,x], [inputY, inputX]): #if the input is on a letter pixel add one to score and return
                            score = score +1
-                           return dWinNum, 0, False, score, Direction
+                           return dWinNum, 0, False, score, direction
                     else:    
                         FirstKey += 1 #Counts up as the loop goes on so every value has a unquie key in the dict
                         totalDisOne = int(totalDistance(x, y, inputX, inputY))
                         pixDistFirst.insert(FirstKey, totalDisOne)
-                        pixDirFirst[totalDisOne] =  getDirection(inputX, inputY, x, y)
+                        pixDirFirst[totalDisOne] =  getdirection(inputX, inputY, x, y)
 
 
         for x in range(dWinList[dWinNum+1].xmin, dWinList[dWinNum+1].xmax):
@@ -166,12 +166,12 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
                 if  np.array_equal(img[y, x],black):
                     if np.array_equal(img[y,x], [inputY, inputX]): #if the input is on a letter pixel add one to score and return
                            score = score +1
-                           return dWinNum+1, 0, False, score, Direction
+                           return dWinNum+1, 0, False, score, direction
                     else:
                         SecondKey += 1 #Counts up as the loop goes on so every value has a unquie key in the dict
                         totalDisTwo = int(totalDistance(x, y, inputX, inputY))
                         pixDistSecond.insert(SecondKey, totalDisTwo)
-                        pixDirSecond[totalDisTwo] =  getDirection(inputX, inputY, x, y)
+                        pixDirSecond[totalDisTwo] =  getdirection(inputX, inputY, x, y)
         
         if FirstKey != 0: 
             minPixDist.update({dWinNum: min(pixDistFirst)})
@@ -180,23 +180,23 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
             minPixDist.update({dWinNum+1: min(pixDistSecond)})
         else: minPixDist[dWinNum+1] = 1000
         if minPixDist[dWinNum+1] < minPixDist[dWinNum]:
-            Direction = pixDirSecond[minPixDist[dWinNum+1]]
+            direction = pixDirSecond[minPixDist[dWinNum+1]]
             #print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (dWinNum+1, minPixDist[dWinNum+1]))
             pixDistFirst.clear()
             pixDistSecond.clear()
             pixDirFirst.clear()
             pixDirSecond.clear()
-            return dWinNum+1, minPixDist[dWinNum+1], False, score, Direction 
+            return dWinNum+1, minPixDist[dWinNum+1], False, score, direction 
         elif minPixDist[dWinNum] < 1000:
-            Direction = pixDirFirst[minPixDist[dWinNum]]
-            #print ("Window#= %s, Distance from Input to nearest letter pixel = %s, Direction = %s"% (dWinNum, minPixDist[dWinNum], Direction))
+            direction = pixDirFirst[minPixDist[dWinNum]]
+            #print ("Window#= %s, Distance from Input to nearest letter pixel = %s, direction = %s"% (dWinNum, minPixDist[dWinNum], direction))
             pixDistFirst.clear()
             pixDistSecond.clear()
             pixDirFirst.clear()
             pixDirSecond.clear()
-            return dWinNum, minPixDist[dWinNum], False, score, Direction
+            return dWinNum, minPixDist[dWinNum], False, score, direction
         else:
-            return dWinNum, 0, True, score, Direction 
+            return dWinNum, 0, True, score, direction 
 
 
 init()

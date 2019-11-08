@@ -34,7 +34,7 @@ pixDirSecond = {}
 pixDistStart = 100
 minPixDist = {}
 # grab the referenceto the webcam
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 # define the lower and upper boundaries of the "green"
 colorLower = (0, 120, 70)
 colorUpper = (50, 255, 180)
@@ -153,7 +153,7 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
                     yDistance = y - inputY
                     xDistance = x - inputX
                      #numpy.allclose(a, b, rtol=0, atol=3, equal_nan=False)
-                    if yDistance <= 3 and xDistance <= 3:
+                    if yDistance <= 2 and xDistance <= 2:
                            score = score +1
                            return dWinNum, 0, False, score, direction
                     else:    
@@ -181,24 +181,29 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
         if SecondKey != 0: 
             minPixDist.update({dWinNum+1: min(pixDistSecond)})
         else: minPixDist[dWinNum+1] = 1000
-        if minPixDist[dWinNum+1] < minPixDist[dWinNum]:
+        if (minPixDist[dWinNum+1] + 1) < minPixDist[dWinNum]:
             direction = pixDirSecond[minPixDist[dWinNum+1]]
-            #print ("Window#= %s, Distance from Input to nearest letter pixel = %s"% (dWinNum+1, minPixDist[dWinNum+1]))
+            #print ("Window#= %s, Distance = %s, direction = %s"% (dWinNum+1, minPixDist[dWinNum+1], direction))
             pixDistFirst.clear()
             pixDistSecond.clear()
             pixDirFirst.clear()
             pixDirSecond.clear()
             return dWinNum+1, minPixDist[dWinNum+1], False, score, direction 
-        elif minPixDist[dWinNum] < 1000:
+        #end the gmae here elif dwin 36 ... need to make it go to dwin 36 no current logic 
+# =============================================================================
+#         else:
+#             return dWinNum, 0, True, score, direction 
+# =============================================================================
+        #elif minPixDist[dWinNum] < 1000:
+        else:  
             direction = pixDirFirst[minPixDist[dWinNum]]
-            #print ("Window#= %s, Distance from Input to nearest letter pixel = %s, direction = %s"% (dWinNum, minPixDist[dWinNum], direction))
+            #print ("Window#= %s, Distance = %s, direction = %s"% (dWinNum, minPixDist[dWinNum], direction))
             pixDistFirst.clear()
             pixDistSecond.clear()
             pixDirFirst.clear()
             pixDirSecond.clear()
             return dWinNum, minPixDist[dWinNum], False, score, direction
-        else:
-            return dWinNum, 0, True, score, direction 
+        
 
 
 init()
@@ -249,6 +254,7 @@ while True:
                 else: #Play the game
                     winNum, pixDistance, endFlag, score, direction = getMinDistance(letter, winNum, centerX, centerY, score)
                     cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+                    print ("Distance = %s, direction = %s, Win# %s"% (pixDistance, direction, winNum))
                     msg = ("{0},{1}".format(direction, pixDistance))
                     client.publish("motors",msg)
                     #send distance to arduino here!
@@ -259,6 +265,8 @@ while True:
     #client.loop_forever()
     # if the q key is pressed, stop the loop
     if key == ord("q") or endFlag == True:
+        msg = ("{0},{1}".format(0, 0 ))
+        client.publish("motors",msg)
         print("Your Score is %s letter pixels hit out of 611 letter pixels"%(score))
         break
 

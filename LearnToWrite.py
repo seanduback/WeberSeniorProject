@@ -35,7 +35,7 @@ pixDistStart = 100
 minPixDist = {}
 # grab the referenceto the webcam
 camera = cv2.VideoCapture(0)
-# define the lower and upper boundaries of the "green"
+# define the lower and upper boundaries of the "orange"
 colorLower = (0, 120, 70)
 colorUpper = (50, 255, 180)
 winNum = 0
@@ -208,8 +208,8 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
 
 init()
 #colorDwin(letter, dWinList)
-broker= "test.mosquitto.org"
-client = mqtt.Client("computer")
+broker = "192.168.43.175"
+client = mqtt.Client("computer2")
 client.connect(broker)
 while True:
     cv2.imshow("Learn to Write!", letter)
@@ -245,7 +245,7 @@ while True:
             if startFlag == False: #Wait until input is near Dwin 0 to start game
                 cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
                 startFlag = start(letter, centerX,centerY)
-            else:
+            else: 
                 if oldStartFlag == False: #Clean the img on game start 
                     oldStartFlag = True 
                     letter = cv2.imread('bw_image.png', 1)

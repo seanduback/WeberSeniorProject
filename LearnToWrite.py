@@ -14,11 +14,9 @@ import time
 #     Make windows
 #     Get input from camera
 #     Wait until input is inside window 1 to start
-#     On start begin comparing window 1 and 2 to mouse
+#     On start begin comparing window 1 and 2 to camera input
 #     Move to comparing window 2 and 3 when the distance to any point in window 2 is less than the distance to any point in window 1
-
-
-#  send 2 numbers, send direction as 1-4 and distance as 1-100 
+#     send direction as 1-4 and distance as an integer value to the server
 
 ############################################################ Global Variables ###############################################
 white = [255,255,255]
@@ -33,7 +31,7 @@ pixDistSecond = []
 pixDirSecond = {}
 pixDistStart = 100
 minPixDist = {}
-# grab the referenceto the webcam
+# grab the reference to the webcam
 camera = cv2.VideoCapture(0)
 # define the lower and upper boundaries of the "orange"
 colorLower = (0, 120, 70)
@@ -59,7 +57,7 @@ class Dwin(object):
 ############################################################# Functions ###########################################
 
 def colorDwin (img, class_type="Dwin"):
-    #func used for debugging 
+    #func used for debugging colors in the dWins black and makes the letter white
     for Dwin in dWinList:
         print ("Window#= %s, xmin=%s, xmax= %s, ymin= %s ymax= %s"% (Dwin.idnum, Dwin.xmin, Dwin.xmax, Dwin.ymin, Dwin.ymax))
         for x in range(Dwin.xmin, Dwin.xmax):
@@ -67,11 +65,11 @@ def colorDwin (img, class_type="Dwin"):
                 if np.array_equal(img[y, x], black):
                     print ("x=%s y=%s"%(x, y))
                     img[y, x] = white
-                # else:
-                #     img[y, x] = 0
+                else:
+                     img[y, x] = 0
 
 def init ():
-    #make Distance windows
+    #make Distance windows starting at the lower left corner and moving towards the upper right 
     dWinList.append(Dwin(0, 421, 404, 366, 374))
     dWinList.append(Dwin(1, 404, 402, 372, 376))
     dWinList.append(Dwin(2, 402, 396, 374, 378))
@@ -143,8 +141,8 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
     FirstKey = 0 #used as flags for distance to not update min distince if no new values
     SecondKey = 0 #used as flags for distance to not update min distince if no new values
     direction = 0
-    #print("DwinNum = %s"%(dWinNum))
-    if dWinNum == 36: #if the game is over return end game true
+    #print("DwinNum = %s"%(dWinNum))  #used for debugging
+    if dWinNum == 36: #if the game is over return end game true, no currect dWin 36 in logic, game will never end
         return 36, 0, True
     else:
         for x in range(dWinList[dWinNum].xmin, dWinList[dWinNum].xmax):
@@ -153,22 +151,30 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
                     yDistance = y - inputY
                     xDistance = x - inputX
                      #numpy.allclose(a, b, rtol=0, atol=3, equal_nan=False)
-                    if yDistance <= 2 and xDistance <= 2:
-                           score = score +1
-                           return dWinNum, 0, False, score, direction
+                    if yDistance <= 2 and xDistance <= 2: # a two pixel tolerance is added to the first window as a handicap for the user
+                        score = score +1
+                        pixDistFirst.clear()
+                        pixDistSecond.clear()
+                        pixDirFirst.clear()
+                        pixDirSecond.clear()
+                        return dWinNum, 0, False, score, direction
                     else:    
                         FirstKey += 1 #Counts up as the loop goes on so every value has a unquie key in the dict
-                        totalDisOne = int(totalDistance(x, y, inputX, inputY))
-                        pixDistFirst.insert(FirstKey, totalDisOne)
-                        pixDirFirst[totalDisOne] =  getdirection(inputX, inputY, x, y)
+                        totalDisOne = int(totalDistance(x, y, inputX, inputY)) #the distance of the user input from the black pixel is calculated
+                        pixDistFirst.insert(FirstKey, totalDisOne) #the distance is stored in a dict with the "FirstKey" acting as the key
+                        pixDirFirst[totalDisOne] =  getdirection(inputX, inputY, x, y) #A direction is stored with using the distance as its location in a list
 
 
         for x in range(dWinList[dWinNum+1].xmin, dWinList[dWinNum+1].xmax):
             for y in range(dWinList[dWinNum+1].ymin, dWinList[dWinNum+1].ymax, -1):
                 if  np.array_equal(img[y, x],black):
                     if np.array_equal(img[y,x], [inputY, inputX]): #if the input is on a letter pixel add one to score and return
-                           score = score +1
-                           return dWinNum+1, 0, False, score, direction
+                        score = score +1
+                        pixDistFirst.clear()
+                        pixDistSecond.clear()
+                        pixDirFirst.clear()
+                        pixDirSecond.clear()
+                        return dWinNum+1, 0, False, score, direction
                     else:
                         SecondKey += 1 #Counts up as the loop goes on so every value has a unquie key in the dict
                         totalDisTwo = int(totalDistance(x, y, inputX, inputY))
@@ -176,28 +182,28 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
                         pixDirSecond[totalDisTwo] =  getdirection(inputX, inputY, x, y)
         
         if FirstKey != 0: 
-            minPixDist.update({dWinNum: min(pixDistFirst)})
-        else: minPixDist[dWinNum] = 1000
+            minPixDist.update({dWinNum: min(pixDistFirst)}) #the minimum distance from the first Dwin is taken
+        else: minPixDist[dWinNum] = 1000 #used to asign a value to minPixDist if none was found 
         if SecondKey != 0: 
-            minPixDist.update({dWinNum+1: min(pixDistSecond)})
-        else: minPixDist[dWinNum+1] = 1000
-        if (minPixDist[dWinNum+1] + 1) < minPixDist[dWinNum]:
-            direction = pixDirSecond[minPixDist[dWinNum+1]]
-            #print ("Window#= %s, Distance = %s, direction = %s"% (dWinNum+1, minPixDist[dWinNum+1], direction))
+            minPixDist.update({dWinNum+1: min(pixDistSecond)})  #the minimum distance from the second Dwin is taken
+        else: minPixDist[dWinNum+1] = 1000  #used to asign a value to minPixDist if none was found 
+        if (minPixDist[dWinNum+1] + 1) < minPixDist[dWinNum]: #compares the two min distances
+            direction = pixDirSecond[minPixDist[dWinNum+1]] #grabs the direction associated with the minimum distance
+            #print ("Window#= %s, Distance = %s, direction = %s"% (dWinNum+1, minPixDist[dWinNum+1], direction))  #used for debugging
             pixDistFirst.clear()
             pixDistSecond.clear()
             pixDirFirst.clear()
             pixDirSecond.clear()
             return dWinNum+1, minPixDist[dWinNum+1], False, score, direction 
-        #end the gmae here elif dwin 36 ... need to make it go to dwin 36 no current logic 
+            #returns the new dWinNum, min distance, flag signaling the game is to continue, the current score, and direction
+        #end the gmae here elif dwin 36 ... need to make it go to dwin 36 no current logic for a 36th decision window 
 # =============================================================================
 #         else:
 #             return dWinNum, 0, True, score, direction 
 # =============================================================================
-        #elif minPixDist[dWinNum] < 1000:
         else:  
             direction = pixDirFirst[minPixDist[dWinNum]]
-            #print ("Window#= %s, Distance = %s, direction = %s"% (dWinNum, minPixDist[dWinNum], direction))
+            #print ("Window#= %s, Distance = %s, direction = %s"% (dWinNum, minPixDist[dWinNum], direction)) #used for debugging
             pixDistFirst.clear()
             pixDistSecond.clear()
             pixDirFirst.clear()
@@ -205,9 +211,9 @@ def getMinDistance (img, dWinNum, inputX, inputY, score):
             return dWinNum, minPixDist[dWinNum], False, score, direction
         
 
-
+############################################################# Main ########################################################
 init()
-#colorDwin(letter, dWinList)
+#colorDwin(letter, dWinList) #used to color in the dWin black for debugging
 broker = "192.168.43.175"
 client = mqtt.Client("computer2")
 client.connect(broker)
@@ -230,7 +236,7 @@ while True:
 
     # find contours in the mask and initialize the current (x, y) center of the ball
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-    center = None #why is center none?
+    #center = None #why is center none?
 
     # only proceed if at least one contour was found
     if len(cnts) > 0:
@@ -240,29 +246,30 @@ while True:
         M = cv2.moments(c)
         centerX = (int(M["m10"] / M["m00"])+50)
         centerY = (int(M["m01"] / M["m00"])+50)
-        #print("X is %s, Y is %s"%(int(centerX),int(centerY)))
-        if centerX < 800 and centerY < 600: 
-            if startFlag == False: #Wait until input is near Dwin 0 to start game
+        #print("X is %s, Y is %s"%(int(centerX),int(centerY))) #used for debugging
+        #if centerX < 800 and centerY < 600: 
+        if startFlag == False: #Wait until input is near Dwin 0 to start game
+            cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+            startFlag = start(letter, centerX,centerY)
+        else: 
+            if oldStartFlag == False: #Clean the img on game start 
+                oldStartFlag = True 
+                letter = cv2.imread('bw_image.png', 1)
+                winNum, pixDistance, endFlag, score, direction = getMinDistance(letter, winNum, centerX, centerY, score)
                 cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
-                startFlag = start(letter, centerX,centerY)
-            else: 
-                if oldStartFlag == False: #Clean the img on game start 
-                    oldStartFlag = True 
-                    letter = cv2.imread('bw_image.png', 1)
-                    winNum, pixDistance, endFlag, score, direction = getMinDistance(letter, winNum, centerX, centerY, score)
-                    cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
-                else: #Play the game
-                    winNum, pixDistance, endFlag, score, direction = getMinDistance(letter, winNum, centerX, centerY, score)
-                    cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
-                    print ("Distance = %s, direction = %s, Win# %s"% (pixDistance, direction, winNum))
-                    msg = ("{0},{1}".format(direction, pixDistance))
-                    client.publish("motors",msg)
-                    #send distance to arduino here!
+            else: #Play the game
+                winNum, pixDistance, endFlag, score, direction = getMinDistance(letter, winNum, centerX, centerY, score)
+                cv2.circle(letter, (centerX, centerY), 1, (0, 0, 255), -1)
+                print ("Distance = %s, direction = %s, Win# %s"% (pixDistance, direction, winNum))
+                msg = ("{0},{1}".format(direction, pixDistance))
+                #send distance to arduino here!
+                client.publish("motors",msg)
+
     
 
     cv2.imshow("Learn to Write!", letter)
     key = cv2.waitKey(1) & 0xFF
-    #client.loop_forever()
+
     # if the q key is pressed, stop the loop
     if key == ord("q") or endFlag == True:
         msg = ("{0},{1}".format(0, 0 ))

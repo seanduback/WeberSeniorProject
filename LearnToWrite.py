@@ -1,22 +1,12 @@
+#Engineers: Sean Duback, Robert Geoffrion
+#School: Weber State University 
+#Project: Motion Tracking
+#Year: 2019 Acidemic Year
+
 import numpy as np
 import cv2
 import math
 import paho.mqtt.client as mqtt
-import time
-# =============================================================================
-# from Tkinter import *
-# import bluetooth
-# =============================================================================
-
-
-# Notes
-#     Make image black and white
-#     Make windows
-#     Get input from camera
-#     Wait until input is inside window 1 to start
-#     On start begin comparing window 1 and 2 to camera input
-#     Move to comparing window 2 and 3 when the distance to any point in window 2 is less than the distance to any point in window 1
-#     send direction as 1-4 and distance as an integer value to the server
 
 ############################################################ Global Variables ###############################################
 white = [255,255,255]
@@ -281,4 +271,129 @@ camera.release()
 cv2.destroyAllWindows()
 
 
+###################################################################### ARCHIVE ###################################################################
+#Below is a failed attempt at automating the creation of Decision Windows
 
+# def isPixUp(img, y, x, wId):
+#     y = y-3
+#     for xw in range(x, x+2):
+#         for yw in range(y-2, y):
+#             if xw >= 1920: break
+#             elif img[yw, xw] == 0:
+#                 wId += 1   
+#                 dWinList.append(Dwin(wId, y, y-3, x, x+3, 'u'))
+#                 return y, x, wId 
+#     return y, x, wId 
+
+# def isPixUpperRight(img, y, x, wId):
+#     y = y-3
+#     x = x+3
+#     for xw in range(x, x+2):
+#         for yw in range(y-2, y):
+#             if xw >= 1920: break
+#             elif img[yw, xw] == 0:    
+#                 wId += 1   
+#                 dWinList.append(Dwin(wId, y, y-3, x, x+3, 'ur'))
+#                 return y, x, wId 
+#     return 0
+
+# def isPixRight(img, y, x, wId):
+#     x = x+5
+#     for xw in range(x, x+4):
+#         for yw in range(y-4, y+1):
+#             if img[yw, xw] == 0: 
+#                 wId += 1   
+#                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'r'))
+#                 return y, x, wId 
+#     return 0
+
+# def isPixLeft(img, y, x, wId):
+#     x = x - 10
+#     for xw in range(x, x+4):
+#         for yw in range(y-4, y):
+#             if img[yw, xw] == 0:
+#                 wId += 1
+#                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'l'))
+#                 return y, x, wId 
+#     return 0
+
+# def isPixUpperLeft(img, y, x, wId):
+#     y = y-5
+#     x = x-5
+#     for xw in range(x, x+4):
+#         for yw in range(y-4, y):
+#             if xw >= 1920: break
+#             elif img[yw, xw] == 0:
+#                 wId += 1
+#                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'ul'))
+#                 return y, x, wId 
+#     return 0
+
+# def isPixDown(img, y, x, wId):
+#     y = y+5
+#     for xw in range(x, x+4):
+#         for yw in range(y-4, y):
+#             if xw >= 1920: break
+#             elif img[yw, xw] == 0:
+#                 wId += 1
+#                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'd'))
+#                 return y, x, wId 
+#     return 
+
+# def isPixDownLeft(img, y, x, wId):
+#     y = y+5
+#     x = x-5
+#     for xw in range(x, x+9):
+#         for yw in range(y-9, y):
+#             if xw >= 1920: break
+#             elif img[yw, xw] == 0:
+#                 wId += 1
+#                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'dl'))
+#                 return y, x, wId 
+#     return 0
+
+# def isPixDownRight(img, y, x, wId):
+#     y = y+5
+#     x = x+5
+#     for xw in range(x, x+9):
+#         for yw in range(y-9, y):
+#             if xw >= 1920: break
+#             elif img[yw, xw] == 0:    
+#                 wId += 1   
+#                 dWinList.append(Dwin(wId, y, y-5, x, x+5, 'dr'))
+#                 return y, x, wId
+#     return 0
+
+# def createFirstDWindow(img, y, x, wId):
+#     dWinList.append(Dwin(wId, y, y-5, x, x+5, 'fr')) #create first window at the most lower left pixel
+#     return y, x, wId
+
+# def initLetter(img, class_type = "Dwin"):
+#     """Convert img to BW and Create Decision windows"""
+#     #change the image to black and white
+#     changeToBW(img)
+#     # find the height, width, of the image
+#     ys = img.shape[0]
+#     xs = img.shape[1]
+#     oneTimeFlag = 1
+#     wId = 1
+#     #iterate over image starting at bottom left to find most lower left pixel
+#     x = 0
+#     y = ys-1
+#     while x < xs-1:
+#         y = ys-1
+#         while  y > 0:
+#             if img[y, x] == 0:
+#                 if oneTimeFlag:
+#                     oneTimeFlag = 0
+#                     y, x, wId = createFirstDWindow(img, y, x, wId)
+#                     y, x, wId = isPixUp(img, y, x, wId)
+#                     y, x, wId = isPixUpperRight(img, y, x, wId)
+#                     y, x, wId = isPixUp(img, y, x, wId)
+#                     y, x, wId = isPixUpperRight(img, y, x, wId)
+
+                   
+#                     return 
+#             else:
+#                 y -= 1
+#         x += 1   

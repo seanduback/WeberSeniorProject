@@ -1,8 +1,25 @@
-import sys
+#Engineers: Sean Duback, Robert Geoffrion
+#School: Weber State University 
+#Project: Motion Tracking
+#Year: 2019 Acidemic Year
 import numpy as np 
 import cv2
-from pynput.mouse import Controller
 
+white = [255,255,255]
+black = [0,0,0]
+
+im_gray = cv2.imread('ScriptLsmall.jpg', cv2.IMREAD_GRAYSCALE)
+(thresh, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+cv2.imwrite('bw_image.jpg', im_bw)
+
+letter2 = cv2.imread('bw_image.png', 1) 
+for x in range(0, 799):
+    for y in range(599, 0, -1):
+        if (np.array_equal(letter2[y, x],white) == False) and (np.array_equal(letter2[y, x],black) == False):
+            print ("Color = %s, x = %s, y = %s"%(letter2[y,x], x, y))
+
+######################################################### Archive ###############################################################
+## Below is a way to acomplish the same thing happening above
 # white = [255,255,255]
 # black = [0,0,0]
 # nearBlack = [20,20,20]
@@ -51,18 +68,3 @@ from pynput.mouse import Controller
 
 
 # changeToBW(letter)
-
-
-white = [255,255,255]
-black = [0,0,0]
-nearBlack = [5,5,5]
-
-im_gray = cv2.imread('ScriptLsmall.jpg', cv2.IMREAD_GRAYSCALE)
-(thresh, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-cv2.imwrite('bw_image.jpg', im_bw)
-
-letter2 = cv2.imread('bw_image.png', 1) 
-for x in range(0, 799):
-    for y in range(599, 0, -1):
-        if (np.array_equal(letter2[y, x],white) == False) and (np.array_equal(letter2[y, x],black) == False):
-            print ("Color = %s, x = %s, y = %s"%(letter2[y,x], x, y))

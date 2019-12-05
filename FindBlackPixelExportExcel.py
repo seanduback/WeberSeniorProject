@@ -1,3 +1,7 @@
+#Engineers: Sean Duback, Robert Geoffrion
+#School: Weber State University 
+#Project: Motion Tracking
+#Year: 2019 Acidemic Year
 import numpy as np 
 import cv2
 import xlwt
